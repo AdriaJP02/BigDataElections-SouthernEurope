@@ -4,9 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import streamlit_shadcn_ui as ui
 from local_components import card_container
+from streamlit_shadcn_ui import slider, input, textarea, radio_group, switch
 
 # Set page config
-st.set_page_config(page_title="Data Exploration", page_icon="🔎", layout="wide")
+#st.set_page_config(page_title="Data Exploration", page_icon="🔎", layout="wide")
 
 # Custom CSS for background
 
@@ -20,12 +21,19 @@ page_bg_img = """
         """
 #st.markdown(page_bg_img, unsafe_allow_html=True)
 
-st.title('**🔎 Data Exploration**')
+# Sidebar titles
+st.sidebar.title(":material/bar_chart: Data Exploration")
+st.sidebar.subheader("1. Plots per Country")
+st.sidebar.subheader("1.1. Plots per Political Parties Share")
+st.sidebar.subheader("1.2. Plots per Candidates Political Party Share")
+st.sidebar.subheader("2. Exploratory Plots")
+
+st.title('**:material/bar_chart: Data Exploration**')
 
 # Load dataset
 data = pd.read_csv('data/datasetEDA.csv')
 
-st.subheader("**1. Political Parties and Their Characteristics**")
+#st.subheader("**1. Political Parties and Their Characteristics**")
 charac_parties_df = pd.DataFrame({
     'Party Name': ["PP","PSOE","VOX","Sumar","PSP","PSD","CH","IL","FdI", "PD", "M5E", "Lega", "ND", "SYRIZA","PASOK", "KKE"],
     'Country': ["Spain","Spain","Spain","Spain","Portugal","Portugal","Portugal","Portugal","Italy", "Italy", "Italy", "Italy","Greece", "Greece", "Greece", "Greece"],
@@ -37,12 +45,7 @@ charac_parties_df = pd.DataFrame({
     'Party Government': [0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0],
     'Results': ["33.06%", "31.68%", "12.38%", "12.33%", "41.37%", "29.09%", "7.18%", "4.91%", "26.00%", "19.07%", "15.43%", "8.77%", "40.56%", "17.83%", "11.84%", "7.69%"]
 })
-st.table(charac_parties_df)
-
-st.subheader("**2. Plots per Country**")
-st.subheader("2.1. Plots per Polytical Parties Share")
-# Tabs for Spain, Italy, Portugal, Greece
-selected_country_parties = ui.tabs(options=['Spain', 'Italy', 'Portugal', 'Greece'], default_value='Spain', key="country_tabs_parties")
+#st.table(charac_parties_df)
 
 # Define political parties for different countries 
 political_parties = {
@@ -60,6 +63,7 @@ country_code = {
 
 days_left_input = 1
 
+# Functions to display bar plots per country
 def calculate_means(country_name,country_prefix, is_candidate):
     """Calculate means for the given country prefix."""
     cand_data_prefix = ""
@@ -277,7 +281,11 @@ def plot_data(means, party_names, country_name, is_candidate):
 
                 ui.card(title="Google Data", content=f"{mean_google_data_old}%", description="Mean for the most established party candidate (ND)", key="card4").render()
                 ui.card(title="Wikipedia Data", content=f"{mean_wiki_data_old}%", description="Mean for the most established party candidate (ND)", key="card5").render()
-                
+
+st.subheader("**1. Plots per Country**")
+st.subheader("1.1. Plots per Political Parties Share")
+# Tabs for Spain, Italy, Portugal, Greece
+selected_country_parties = ui.tabs(options=['Spain', 'Italy', 'Portugal', 'Greece'], default_value='Spain', key="country_tabs_parties")
 # Process each selected country
 if selected_country_parties in political_parties:
     means = calculate_means(selected_country_parties,country_code[selected_country_parties], False) 
@@ -294,7 +302,7 @@ Each country has <span style="color: violet;">**different search trends**</span>
 **common** trends. However, there is **no general trend** among the four selected **European** countries.   
 """, unsafe_allow_html=True)
 
-st.subheader("2.2. Plots per Candidates Polytical Party Share")
+st.subheader("1.2. Plots per Candidates Political Party Share")
 
 selected_country_cands = ui.tabs(options=['Spain', 'Italy', 'Portugal', 'Greece'], default_value='Spain', key="country_tabs_cands")
 
@@ -314,13 +322,13 @@ tend to have a greater **Internet presence**.
 """, unsafe_allow_html=True)
 
 
-st.subheader("**3. Exploratory Plots**")
+st.subheader("**2. Exploratory Plots**")
 
 st.write("""
     This section contains various filters to explore the election data based on party names, features, and other aspects. 
     Please use the filters on the right to customize the view and analyze the data effectively.
     """)
-
+# Functions to the personalized bar plots
 def party2country_prefix(party_name): #political_parties, country_code
     party_country_prefix = ''
     countries = ['Spain', 'Italy', 'Portugal', 'Greece']
@@ -433,18 +441,18 @@ parties_selected = []
 means_to_display = {}
 
 # Section: Time
-with st.expander("⏳ Time", expanded=True):
+with st.expander(":material/timer: Time", expanded=True): #:material/hourglass_top:
     st.markdown("Select Time Range")
-    days_left = st.slider("Days Left for Election Date", 1, 14, 1)
+    days_left = st.slider("Days Left for Election Date", 1, 14, 1)#slider(default_value=[1], min_value=1, max_value=14, step=1, label="Days Left for Election Date", key="slider1")
 
 # Column layout: left for text, right for filters
-col1, col2 = st.columns([3, 1])
+col1, col2, col3 = st.columns([3, 1, 1])
 
 # Filters Column (col2): to save changes
 with col2:
     
     # Section: Parties
-    with st.expander("🗳️ Parties", expanded=True):
+    with st.expander(":material/business_center: Parties", expanded=True): 
         # Custom tabs-like behavior using radio buttons
         tab_parties_names_or_features = ui.tabs(options=['Names', 'Features'], default_value='Names', key="features_tabs_parties")
 
@@ -461,31 +469,26 @@ with col2:
             ideologies = st.multiselect("Ideology", ["Far-Left","Left", "Center-Left","Center-Right","Right", "Far-Right"])
             party_ages = st.multiselect("Party Age", ["New", "Established"])
             party_gov = st.multiselect("Party Government", ["In Government", "Opposition"])
-    
+with col3:
     # Section: Data
-    with st.expander("📊 Data", expanded=True):
-        st.markdown("**Google Data**")
-        st.markdown("Parties")
+    with st.expander(":material/database: Data", expanded=True): 
+        #💼👤
+        st.markdown("**Parties Data**")
         news_data = st.checkbox("NewsShare")
         web_data = st.checkbox("WebShare")
         yt_data = st.checkbox("YoutubeShare")
-        st.markdown("Candidates")
+        wiki_data = st.checkbox("WikipediaShare")
+        polls_data = st.checkbox("Polls")
+        st.markdown("**Candidates Data**")
         cand_news_data = st.checkbox("CandNewsShare")
         cand_web_data = st.checkbox("CandWebShare")
         cand_yt_data = st.checkbox("CandYoutubeShare")
-
-        st.markdown("**Wikipedia Data**")
-        st.markdown("Parties")
-        wiki_data = st.checkbox("WikipediaShare")
-        st.markdown("Candidates")
         cand_wiki_data = st.checkbox("CandWikipediaShare")
-
-        st.markdown("**Polls Data**")
-        polls_data = st.checkbox("Polls")
+        
     
     # Filter the selected parties
     if tab_parties_names_or_features == 'Names':
-        # If the user selects the polytical parties to be displayed then when merge them
+        # If the user selects the political parties to be displayed then when merge them
         parties_selected = party_names_selection_es + party_names_selection_it + party_names_selection_pt + party_names_selection_gr
     elif tab_parties_names_or_features == 'Features':
         # Else, we extract the parties from the features selected by the user
@@ -495,12 +498,12 @@ with col2:
     if news_data: data_selected.append("NewsShare")
     if web_data: data_selected.append("WebShare")
     if yt_data: data_selected.append("YoutubeShare")
+    if wiki_data: data_selected.append("WikipediaShare")
+    if polls_data: data_selected.append("Polls")
     if cand_news_data: data_selected.append("CandNewsShare")
     if cand_web_data: data_selected.append("CandWebShare")
     if cand_yt_data: data_selected.append("CandYoutubeShare")
-    if wiki_data: data_selected.append("WikipediaShare")
     if cand_wiki_data: data_selected.append("CandWikipediaShare")
-    if polls_data: data_selected.append("Polls")
 
     # Check that user have selected parties and data
     if (parties_selected != [] and data_selected != []):

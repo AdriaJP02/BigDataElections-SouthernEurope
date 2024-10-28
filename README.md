@@ -50,7 +50,7 @@ To run the project locally:
 
 3. Run the Streamlit application:
     ```bash
-    streamlit run app.py
+    streamlit run streamlit_app.py
     ```
 
 ## License
